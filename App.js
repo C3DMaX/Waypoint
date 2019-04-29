@@ -12,6 +12,9 @@ export default class App extends React.Component {
     //todo: camera prop defaults
     camPermission:false,
     ratios:[],
+    ratio:'16:9',
+    autoFocus:'on',
+    type:'back',
   }
 
 //check for camera Permissions
@@ -23,21 +26,36 @@ export default class App extends React.Component {
 
 //get supported viewfinder ratios
 
-  getRatios = async => {
+  getRatios = async ()  => {
     const ratios = await this.camera.getSupportedRatios();
     return ratios;
-  }
+  };
+
 
 //todo: implement camera as function
 
-  render() {
-    return (
-
-      //todo: check permission status and call camera function if permission is granted
-      <View style={styles.container}>
-        <Text>Welcome to Waypoint!</Text>
+  renderCamera = () =>
+    (
+      <View style={{flex:1}}>
+        <Camera ref={ref=> {this.camera =ref}}
+          style={styles.camera}
+          type={this.state.type}
+          autoFocus={this.state.autoFocus}
+          ratio={this.state.ratio}>
+        </Camera>
       </View>
-    );
+    )
+
+    nopermissionreminder = () => <Text> No Permission to use camera!</Text>
+
+  render() {
+      const viewfinder = this.state.camPermission
+        ? this.renderCamera()
+        : this.nopermissionreminder();
+      //todo: check permission status and call camera function if permission is granted
+      return <View style={styles.container}>{viewfinder}</View>;
+
+
   }
 }
 
@@ -48,4 +66,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  camera: {
+    flex:1,
+    justifyContent:'space-between',
+  }
 });
