@@ -21,15 +21,8 @@ export default class App extends React.Component {
 
   async componentWillMount() {
     const {status} = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({camPermission: status === 'granted'});
+    this.setState({camPermission: status = 'true'});
   }
-
-//get supported viewfinder ratios
-
-  getRatios = async ()  => {
-    const ratios = await this.camera.getSupportedRatios();
-    return ratios;
-  };
 
 
 //todo: implement camera as function
