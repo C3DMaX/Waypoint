@@ -10,7 +10,7 @@ export default class App extends React.Component {
 
   state = {
     //todo: camera prop defaults
-    camPermission:false,
+    camPermission: null,
     ratios:[],
     ratio:'16:9',
     autoFocus:'on',
@@ -21,7 +21,7 @@ export default class App extends React.Component {
 
   async componentWillMount() {
     const {status} = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({camPermission: status = 'true'});
+    this.setState({camPermission: status === 'granted'});
   }
 
 
@@ -29,17 +29,10 @@ export default class App extends React.Component {
 
   renderCamera = () =>
     (
-      <View style={{flex:1}}>
-        <Camera ref={ref=> {this.camera =ref}}
-          style={styles.camera}
-          type={this.state.type}
-          autoFocus={this.state.autoFocus}
-          ratio={this.state.ratio}>
-        </Camera>
-      </View>
+      //camera not rendering for some reasonnnnnnnn
     )
 
-    nopermissionreminder = () => <Text> No Permission to use camera!</Text>
+  nopermissionreminder = () => <Text> No Permission to use camera!</Text>
 
   render() {
       const viewfinder = this.state.camPermission
