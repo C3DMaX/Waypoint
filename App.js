@@ -1,7 +1,6 @@
 import React from 'react';
 import {Constants, Camera, FileSystem, Permissions} from 'expo';
-import { StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform} from 'react-native';
-
+import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform} from 'react-native';
 
 const flash = {off:'torch',torch:'off'};
 //todo: torch on/off icon logic and icon assets
@@ -29,10 +28,12 @@ export default class App extends React.Component {
 
   renderCamera = () =>
     (
-      //camera not rendering for some reasonnnnnnnn
+      <Camera style={styles.camera} type={this.state.type}>
+          <Text>camera fuck</Text>
+      </Camera>
     )
 
-  nopermissionreminder = () => <Text> No Permission to use camera!</Text>
+  nopermissionreminder = () => <Text> No Permission to use camera! </Text>
 
   render() {
       const viewfinder = this.state.camPermission
@@ -48,12 +49,9 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#fff'
   },
   camera: {
-    flex:1,
-    justifyContent:'space-between',
+    flex:1
   }
 });
