@@ -28,8 +28,7 @@ export default class App extends React.Component {
 
   renderCamera = () =>
     (
-      <Camera style={styles.camera} type={this.state.type}>
-          <Text>camera fuck</Text>
+      <Camera style={styles.camera} type={this.state.type} ratio={this.state.ratio} autoFocus={this.state.autoFocus}>
       </Camera>
     )
 
@@ -52,6 +51,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   camera: {
-    flex:1
+    flex:1,
   }
 });
