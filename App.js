@@ -38,7 +38,7 @@ export default class App extends React.Component {
       const viewfinder = this.state.camPermission
         ? this.renderCamera()
         : this.nopermissionreminder();
-      //todo: create no permission screen or message
+      //todo: create no permission screen or message!
       return <View style={styles.container}>{viewfinder}</View>;
 
 
