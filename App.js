@@ -36,10 +36,12 @@ const flash = {off:'torch',torch:'off'};
       </Camera>
     )
 
-  nopermissionreminder = () => <Text> No Permission to use camera! </Text>
+  nopermissionreminder = () =>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Text>No Camera Permission</Text>
+    </View>
 
   render() {
-      const {navigate} = this.props.navigation;
       const viewfinder = this.state.camPermission
         ? this.renderCamera()
         : this.nopermissionreminder();
