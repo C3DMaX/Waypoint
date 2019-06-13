@@ -24,6 +24,14 @@
     ],
     "ios": {
       "supportsTablet": true
+    },
+    "android": {
+      "package":"com.c3dmax.waypoint",
+      "config":{
+        "googleMaps":{
+          "apiKey":"AIzaSyCxjgINkNyRCPhewMeNQPIRwhsIP3IyIQA"
+        }
+      }
     }
   }
 }

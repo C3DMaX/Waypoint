@@ -1,5 +1,5 @@
 import React from 'react';
-import {Constants, Camera, FileSystem, Permissions} from 'expo';
+import {Constants, Camera, FileSystem, Permissions, Location, MapView} from 'expo';
 import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Button} from 'react-native';
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
@@ -61,9 +61,7 @@ class WaypointMenu extends React.Component {
 
   render() {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>Waypoint Menu</Text>
-      </View>
+      <MapView style={styles.map}/>
     );
   }
 }
@@ -92,6 +90,13 @@ const styles = StyleSheet.create({
     bottom:5,
     right:5,
     margin:5,
+  },
+  map: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });
 
