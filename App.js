@@ -1,5 +1,5 @@
 import React from 'react';
-import {Constants, Camera, FileSystem, Permissions, Location, MapView} from 'expo';
+import {Constants, Camera, FileSystem, Permissions, Location, MapView, Marker} from 'expo';
 import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Button} from 'react-native';
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
@@ -15,18 +15,20 @@ const flash = {off:'torch',torch:'off'};
 
   state = {
     //todo: camera prop defaults
-    camPermission: null,
+    Permissions: null,
     ratios:[],
     ratio:'16:9',
     autoFocus:'on',
     type:'back',
   }
 
-//check for camera Permissions
+//check for Permissions
 
   async componentWillMount() {
-    const {status} = await Permissions.askAsync(Permissions.CAMERA);
-    this.setState({camPermission: status === 'granted'});
+    const {status} = await Permissions.askAsync(Permissions.CAMERA, Permissions.LOCATION);
+    this.setState({Permissions: status === 'granted'});
+
+
   }
 
   renderCamera = () =>
@@ -38,14 +40,14 @@ const flash = {off:'torch',torch:'off'};
 
   nopermissionreminder = () =>
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>No Camera Permission</Text>
+      <Text>Camera and/or Location Permission missing</Text>
     </View>
 
   render() {
-      const viewfinder = this.state.camPermission
+      const viewfinder = this.state.Permissions
         ? this.renderCamera()
         : this.nopermissionreminder();
-      //todo: create no permission screen or message!
+      //todo: style no permission screen or message!
       return <View style={styles.container}>{viewfinder}</View>;
 
 
@@ -61,7 +63,13 @@ class WaypointMenu extends React.Component {
 
   render() {
     return (
-      <MapView style={styles.map}/>
+      <MapView style={styles.map} initialRegion={{
+        latitude: 37.78825,
+        longitude: -122.4324,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      }}
+      />
     );
   }
 }
