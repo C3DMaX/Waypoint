@@ -3,6 +3,7 @@ import {Constants, Camera, FileSystem, Permissions, Location, MapView, Marker} f
 import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Button} from 'react-native';
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
+const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 const flash = {off:'torch',torch:'off'};
 //todo: torch on/off icon logic and icon assets
@@ -26,9 +27,7 @@ const flash = {off:'torch',torch:'off'};
 
   async componentWillMount() {
     const {status} = await Permissions.askAsync(Permissions.CAMERA, Permissions.LOCATION);
-    this.setState({Permissions: status === 'granted'});
-
-
+      this.setState({Permissions: status === 'granted'});
   }
 
   renderCamera = () =>
@@ -61,15 +60,39 @@ class WaypointMenu extends React.Component {
     title: 'Waypoint Menu',
   };
 
+  state = {
+    mapRegion: { latitude: 37.78825, longitude: -122.4324, latitudeDelta: 0.0922, longitudeDelta: 0.0421 },
+    location: {coords: { latitude: 0, longitude: 0}},
+  };
+
+  _getLocationAsync = async () => {
+    console.log('getlocation');
+    location = await Location.getCurrentPositionAsync({});
+    this.setState({ location });
+    console.log('location found');
+ };
+
+ async componentWillMount() {
+   console.log('willmount');
+   this._getLocationAsync();
+ }
+
+
   render() {
+    console.log('render');
+    let lat = this.state.location.coords.latitude;
+    let long = this.state.location.coords.longitude;
+    console.log(lat,long)
     return (
-      <MapView style={styles.map} initialRegion={{
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      }}
-      />
+      <MapView style={styles.map} loadingEnabled={true} showsUserLocation={true} region={
+            {
+              latitude: lat,
+              longitude: long,
+              latitudeDelta: 0.002,
+              longitudeDelta: 0.005,
+            }
+          }
+        />
     );
   }
 }
@@ -80,7 +103,7 @@ const AppNavigator = createStackNavigator(
     menu: WaypointMenu
   },
   {
-    initialRouteName: "cam"
+    initialRouteName: "menu"
   }
 );
 
