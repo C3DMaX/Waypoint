@@ -6,6 +6,7 @@ import {createStackNavigator, createAppContainer} from "react-navigation";
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 const flash = {off:'torch',torch:'off'};
+var loc_global = {coords: { latitude: 37.78825, longitude: -122.4324}};
 //todo: torch on/off icon logic and icon assets
 
   class CamScreen extends React.Component {
@@ -23,11 +24,17 @@ const flash = {off:'torch',torch:'off'};
     type:'back',
   }
 
-//check for Permissions
+  _getLocationAsync = async () => {
+    loc_global = await Location.getCurrentPositionAsync({});
+  };
 
   async componentWillMount() {
     const {status} = await Permissions.askAsync(Permissions.CAMERA, Permissions.LOCATION);
-      this.setState({Permissions: status === 'granted'});
+    this.setState({Permissions: status === 'granted'});
+  }
+
+  componentDidMount() {
+    this._getLocationAsync();
   }
 
   renderCamera = () =>
@@ -61,33 +68,23 @@ class WaypointMenu extends React.Component {
   };
 
   state = {
-    mapRegion: { latitude: 37.78825, longitude: -122.4324, latitudeDelta: 0.0922, longitudeDelta: 0.0421 },
-    location: {coords: { latitude: 0, longitude: 0}},
   };
 
   _getLocationAsync = async () => {
-    console.log('getlocation');
-    location = await Location.getCurrentPositionAsync({});
-    this.setState({ location });
-    console.log('location found');
+    loc_global = await Location.getCurrentPositionAsync({});
  };
 
  async componentWillMount() {
-   console.log('willmount');
-   this._getLocationAsync();
+   //this._getLocationAsync();
  }
 
 
   render() {
-    console.log('render');
-    let lat = this.state.location.coords.latitude;
-    let long = this.state.location.coords.longitude;
-    console.log(lat,long)
     return (
-      <MapView style={styles.map} loadingEnabled={true} showsUserLocation={true} region={
+      <MapView style={styles.map} onPress={e => console.log(e.nativeEvent)} showsMyLocationButton={true} loadingEnabled={true} showsUserLocation={true} region={
             {
-              latitude: lat,
-              longitude: long,
+              latitude: loc_global.coords.latitude,
+              longitude: loc_global.coords.longitude,
               latitudeDelta: 0.002,
               longitudeDelta: 0.005,
             }
@@ -103,7 +100,7 @@ const AppNavigator = createStackNavigator(
     menu: WaypointMenu
   },
   {
-    initialRouteName: "menu"
+    initialRouteName: "cam"
   }
 );
 
