@@ -1,13 +1,19 @@
 import React from 'react';
-import {Constants, Camera, FileSystem, Permissions, Location, MapView, Marker} from 'expo';
+import {Constants, Camera, FileSystem, Permissions, Location, MapView} from 'expo';
 import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Button} from 'react-native';
 import {createStackNavigator, createAppContainer} from "react-navigation";
+
+
 
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 const flash = {off:'torch',torch:'off'};
 var loc_global = {coords: { latitude: 37.78825, longitude: -122.4324}};
+var waypoint_global = null;
 //todo: torch on/off icon logic and icon assets
+
+//************************** CAMERA SCREEN ***********************************
+
 
   class CamScreen extends React.Component {
 
@@ -55,8 +61,6 @@ var loc_global = {coords: { latitude: 37.78825, longitude: -122.4324}};
         : this.nopermissionreminder();
       //todo: style no permission screen or message!
       return <View style={styles.container}>{viewfinder}</View>;
-
-
   }
 }
 
@@ -68,31 +72,38 @@ class WaypointMenu extends React.Component {
   };
 
   state = {
-  };
+      markers: []
+  }
 
   _getLocationAsync = async () => {
     loc_global = await Location.getCurrentPositionAsync({});
- };
+  };
 
- async componentWillMount() {
-   //this._getLocationAsync();
- }
+  async componentWillMount() {
+    //get location again to further insure mapview is not stuck on default region
+   this._getLocationAsync();
+  }
 
+  setMarker(e) {
+    this.setState( { markers: [ {coordinate:e.nativeEvent.coordinate, title: "Waypoint" } ] } );
+    waypoint_global = e.nativeEvent.coordinate;
+    //console.log(waypoint_global);
+  }
 
   render() {
     return (
-      <MapView style={styles.map} onPress={e => console.log(e.nativeEvent)} showsMyLocationButton={true} loadingEnabled={true} showsUserLocation={true} region={
-            {
-              latitude: loc_global.coords.latitude,
-              longitude: loc_global.coords.longitude,
-              latitudeDelta: 0.002,
-              longitudeDelta: 0.005,
-            }
-          }
-        />
+      <MapView style={styles.map} onPress={e => this.setMarker(e)} showsMyLocationButton={true} loadingEnabled={true} showsUserLocation={true}
+        initialRegion={ { latitude: loc_global.coords.latitude, longitude: loc_global.coords.longitude, latitudeDelta: 0.002, longitudeDelta: 0.005 } }
+      >
+        {this.state.markers.map((marker, index) => { return (<MapView.Marker key={index} {...marker}/>) } ) }
+      </MapView>
     );
   }
+
+
 }
+
+//************************** NAVIGATION & STYLES ***********************************
 
 const AppNavigator = createStackNavigator(
   {
