@@ -4,7 +4,7 @@ import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Butto
 import {createStackNavigator, createAppContainer, withNavigationFocus, withNavigation} from "react-navigation";
 import { getDistance } from 'geolib';
 
-const GEOLOCATION_OPTIONS = { Accuracy: 6, timeInterval: 5000, distanceInterval: 1};
+const GEOLOCATION_OPTIONS = { Accuracy: 6, timeInterval: 3000, distanceInterval: 1};
 const flash = {off:'torch',torch:'off'};
 var loc_global = {coords: { latitude: 37.78825, longitude: -122.4324}};
 var waypoint_global = null;
@@ -27,22 +27,20 @@ var nav_mode = false;
     type:'back',
     distance:'',
     nav_mode_loc: false,
+    dist_unit: 'm',
   }
-
-  _getLocationAsync = async () => {
-    loc_global = await Location.getCurrentPositionAsync({});
-  };
 
   async componentWillMount() {
     const {status} = await Permissions.askAsync(Permissions.CAMERA, Permissions.LOCATION);
     this.setState({Permissions: status === 'granted'});
+    loc_global = await Location.getCurrentPositionAsync({});
   }
 
   componentDidMount() {
-    this._getLocationAsync();
     const { navigation } = this.props;
     this.focusListener = navigation.addListener("didFocus", () => {
       if(dist_global != null) {
+        this.updateDistance();
         var dist_local = "Distance to Waypoint: " + dist_global + "m";
       };
       if(this.state.nav_mode_loc !== nav_mode) {
@@ -62,17 +60,31 @@ var nav_mode = false;
     }
     else {
       console.log('navigation started');
-      var dist_local = "Distance to Waypoint: " + dist_global + "m";
+      this.updateDistance();
+      var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit;
       this.setState( {distance: dist_local});
     }
   }
 
   userMoved(new_loc) {
     loc_global = new_loc;
-    dist_global = getDistance(loc_global.coords,waypoint_global);
-    var dist_local = "Distance to Waypoint: " + dist_global + "m";
+
+    this.updateDistance();
+    var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit;
     this.setState( {distance: dist_local});
     console.log('User moved');
+  }
+
+  updateDistance() {
+    dist_global = getDistance(loc_global.coords,waypoint_global);
+
+    if(dist_global>=1000) {
+      dist_global=(dist_global/1000).toFixed(1);
+      this.setState( { dist_unit:'km' } );
+    }
+    else {
+      this.setState( { dist_unit:'m' } );
+    };
   }
 
   renderCamera = () =>
@@ -109,11 +121,8 @@ class WaypointMenu extends React.Component {
       nav_mode_loc: false,
       nav_button_text:'Start Navigation',
       showNavButton: false,
+      dist_unit: 'm',
   }
-
-  _getLocationAsync = async () => {
-    loc_global = await Location.getCurrentPositionAsync({});
-  };
 
   componentDidMount() {
     const { navigation } = this.props;
@@ -140,8 +149,8 @@ class WaypointMenu extends React.Component {
   }
 
   createMarker() {
-    dist_global = getDistance(loc_global.coords,waypoint_global);
-    var dist_local = "Distance: " + dist_global + "m";
+    this.updateDistance();
+    var dist_local = "Distance: " + dist_global + this.state.dist_unit;
     this.setState( { markers: [ {coordinate:waypoint_global, title: "Waypoint", description: dist_local  } ] } );
     this.setState( { showNavButton: true} );
   }
@@ -154,6 +163,7 @@ class WaypointMenu extends React.Component {
   }
 
   async adressToWaypoint(e) {
+    this.setState( { markers: [] } );
     var adress = e.nativeEvent.text;
     gc  = await Location.geocodeAsync(adress);
     if(gc.length != 0) {
@@ -176,6 +186,18 @@ class WaypointMenu extends React.Component {
           ],
         );
       }
+    };
+  }
+
+  updateDistance() {
+    dist_global = getDistance(loc_global.coords,waypoint_global);
+
+    if(dist_global>=1000) {
+      dist_global = (dist_global/1000).toFixed(1);
+      this.setState( { dist_unit:'km' } );
+    }
+    else {
+      this.setState( { dist_unit:'m' } );
     };
   }
 
@@ -248,9 +270,9 @@ const styles = StyleSheet.create({
   },
   searchboxcontainer: {
     position:'absolute',
-    left:'5%',
-    top:'3%',
-    width:'90%',
+    left:'12.5%',
+    top:'1.5%',
+    width:'75%',
     borderRadius: 2,
     borderColor: "white",
     shadowColor: "#000",
@@ -264,7 +286,7 @@ const styles = StyleSheet.create({
     backgroundColor:'white',
     borderColor:'transparent',
     borderWidth: 5,
-    fontSize: 20,
+    fontSize: 18,
     paddingLeft: 5,
   }
 });
