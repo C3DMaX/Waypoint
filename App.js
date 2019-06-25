@@ -4,15 +4,14 @@ import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Butto
 import {createStackNavigator, createAppContainer, withNavigationFocus, withNavigation} from "react-navigation";
 import { getDistance } from 'geolib';
 
-
 const GEOLOCATION_OPTIONS = { Accuracy: 6, timeInterval: 5000, distanceInterval: 1};
 const flash = {off:'torch',torch:'off'};
 var loc_global = {coords: { latitude: 37.78825, longitude: -122.4324}};
 var waypoint_global = null;
 var dist_global = null;
 var nav_mode = false;
-//************************** CAMERA SCREEN ***********************************
 
+//************************** CAMERA SCREEN ***********************************
 
   class CamScreen extends React.Component {
 
@@ -21,7 +20,6 @@ var nav_mode = false;
     };
 
   state = {
-    //todo: camera prop defaults
     Permissions: null,
     ratios:[],
     ratio:'16:9',
@@ -38,7 +36,6 @@ var nav_mode = false;
   async componentWillMount() {
     const {status} = await Permissions.askAsync(Permissions.CAMERA, Permissions.LOCATION);
     this.setState({Permissions: status === 'granted'});
-    //console.log('\nInitial:\nGlobal nav_mode: ' + nav_mode + '\nCam nav_mode_loc: ' + this.state.nav_mode_loc)
   }
 
   componentDidMount() {
@@ -47,12 +44,9 @@ var nav_mode = false;
     this.focusListener = navigation.addListener("didFocus", () => {
       if(dist_global != null) {
         var dist_local = "Distance to Waypoint: " + dist_global + "m";
-        //this.setState( {distance: dist_local} );
       };
       if(this.state.nav_mode_loc !== nav_mode) {
-        var nav_loc_old = this.state.nav_mode_loc;
         this.setState(prevState => ({nav_mode_loc: !prevState.nav_mode_loc}));
-        //console.log('\nCamView status: \nGlobal nav_mode: ' + nav_mode + '\nOld nav_mode_loc: ' + nav_loc_old + '\nNew nav_mode_loc: ' + this.state.nav_mode_loc + '\n');
         this.setUpNav();
       }
     });
@@ -98,6 +92,7 @@ var nav_mode = false;
         : this.nopermissionreminder();
       return <View style={styles.container}>{viewfinder}</View>;
   }
+
 }
 
 //************************** MENU SCREEN ***********************************
@@ -118,12 +113,6 @@ class WaypointMenu extends React.Component {
     loc_global = await Location.getCurrentPositionAsync({});
   };
 
-  async componentWillMount() {
-    //get location again to further insure mapview is not stuck on default region(not working btw)
-   //this._getLocationAsync();
-   //console.log('Map nav_mode_loc: ' + this.state.nav_mode_loc)
-  }
-
   componentDidMount() {
     const { navigation } = this.props;
     this.focusListener = navigation.addListener("didFocus", () => {
@@ -131,7 +120,6 @@ class WaypointMenu extends React.Component {
         this.createMarker();
       };
       if(this.state.nav_mode_loc !== nav_mode) {
-        //console.log('changing map local nav mode');
         this.setState(prevState => ({nav_mode_loc: !prevState.nav_mode_loc}));
         this.updateButtonText();
       }
@@ -157,16 +145,11 @@ class WaypointMenu extends React.Component {
   }
 
   toggleNavigation() {
-    var nav_old = nav_mode;
-    var nav_loc_old = this.state.nav_mode_loc;
     nav_mode = !nav_mode;
     this.setState(prevState => ({nav_mode_loc : !prevState.nav_mode_loc}));
-    //console.log('\nNavButton pressed\nMapView status:  \nOld nav_mode_global: ' + nav_old + '\nNew nav_mode_global: ' + nav_mode + '\nOld nav_mode_loc: ' + nav_loc_old + '\nNew nav_mode_loc: ' + this.state.nav_mode_loc + '\n');
     this.updateButtonText();
     this.props.navigation.navigate('cam');
   }
-
-
 
   render() {
     const navbutton = this.state.showNavButton
@@ -183,7 +166,6 @@ class WaypointMenu extends React.Component {
 
     );
   }
-
 
 }
 
