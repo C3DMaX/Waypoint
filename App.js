@@ -1,6 +1,6 @@
 import React from 'react';
 import {Constants, Camera, FileSystem, Permissions, Location, MapView} from 'expo';
-import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Button} from 'react-native';
+import {StyleSheet, Text, View, Alert, TouchableOpacity, Slider, Platform, Button, TextInput} from 'react-native';
 import {createStackNavigator, createAppContainer, withNavigationFocus, withNavigation} from "react-navigation";
 import { getDistance } from 'geolib';
 
@@ -62,6 +62,8 @@ var nav_mode = false;
     }
     else {
       console.log('navigation started');
+      var dist_local = "Distance to Waypoint: " + dist_global + "m";
+      this.setState( {distance: dist_local});
     }
   }
 
@@ -151,17 +153,37 @@ class WaypointMenu extends React.Component {
     this.props.navigation.navigate('cam');
   }
 
+  async adressToWaypoint(e) {
+    var adress = e.nativeEvent.text;
+    gc  = await Location.geocodeAsync(adress);
+    if(gc.length != 0)
+    {
+      gc = gc[0];
+      delete gc.accuracy;
+      delete gc.altitude;
+      waypoint_global = gc;
+      this.createMarker();
+      this.map.animateToCoordinate( { latitude: waypoint_global.latitude, longitude: waypoint_global.longitude }, 1500 );
+    }
+    else {
+      {
+        console.log('invalid adress');
+      }
+    }
+  }
+
   render() {
     const navbutton = this.state.showNavButton
       ? <Button onPress={() => this.toggleNavigation()} title={this.state.nav_button_text}></Button>
       :  <View></View>;
     return (
       <View style={styles.map}>
-        <MapView style={styles.map} onPress={e => this.setMarker(e)} showsMyLocationButton={true} loadingEnabled={true} showsUserLocation={true}
+        <MapView  ref={ref => { this.map = ref; }} style={styles.map} onPress={e => this.setMarker(e)} showsMyLocationButton={true} loadingEnabled={true} showsUserLocation={true}
           initialRegion={ { latitude: loc_global.coords.latitude, longitude: loc_global.coords.longitude, latitudeDelta: 0.002, longitudeDelta: 0.005 } } >
           {this.state.markers.map((marker, index) => { return (<MapView.Marker key={index} {...marker}/>) } ) }
         </MapView>
         <View style={styles.buttoncontainer}>{navbutton}</View>
+        <View style={styles.searchboxcontainer}><TextInput onSubmitEditing={e => this.adressToWaypoint(e)} underlineColorAndroid={'lightgray'} style={styles.searchbox} placeholder={'Search'}></TextInput></View>
       </View>
 
     );
@@ -217,6 +239,27 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  searchboxcontainer: {
+    position:'absolute',
+    left:'5%',
+    top:'3%',
+    width:'90%',
+    borderRadius: 2,
+    borderColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4, },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+    elevation: 8,
+    borderWidth: 5,
+  },
+  searchbox: {
+    backgroundColor:'white',
+    borderColor:'transparent',
+    borderWidth: 5,
+    fontSize: 20,
+    paddingLeft: 5,
+  }
 });
 
 export default createAppContainer(AppNavigator);
