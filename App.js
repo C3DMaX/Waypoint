@@ -156,20 +156,27 @@ class WaypointMenu extends React.Component {
   async adressToWaypoint(e) {
     var adress = e.nativeEvent.text;
     gc  = await Location.geocodeAsync(adress);
-    if(gc.length != 0)
-    {
+    if(gc.length != 0) {
       gc = gc[0];
       delete gc.accuracy;
       delete gc.altitude;
       waypoint_global = gc;
       this.createMarker();
-      this.map.animateToCoordinate( { latitude: waypoint_global.latitude, longitude: waypoint_global.longitude }, 1500 );
+      this.map.animateToCoordinate( { latitude: waypoint_global.latitude, longitude: waypoint_global.longitude }, 1000 );
     }
     else {
       {
+        //implement alert popup
         console.log('invalid adress');
+        Alert.alert(
+          'Adress not found',
+          'Try something like:\n\nBaker Street 1 London',
+          [
+            {text: 'OK', onPress: () => console.log('OK Pressed')},
+          ],
+        );
       }
-    }
+    };
   }
 
   render() {
