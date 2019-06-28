@@ -62,12 +62,14 @@ var waypoint_heading=null;
       heading_sub.remove();
       console.log("navigation stopped");
       this.setState( {distance: null});
+      this.setState( {userHeading: null});
+      this.setState( {waypointHeading: null});
     }
     else {
       console.log('navigation started');
       this.updateDistance();
-      var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit;
-      var headingText = "Waypoint Heading: " + waypoint_heading;
+      var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit + '\n';
+      var headingText = "Waypoint Heading: " + waypoint_heading + '\n';
       this.setState( {waypointHeading: headingText});
       this.setState( {distance: dist_local});
     }
@@ -77,7 +79,7 @@ var waypoint_heading=null;
     loc_global = new_loc;
 
     this.updateDistance();
-    var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit;
+    var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit + '\n';
     this.setState( {distance: dist_local});
     waypoint_heading = this.bearing(loc_global.coords.latitude,loc_global.coords.longitude,waypoint_global.latitude,waypoint_global.longitude);
     waypoint_heading = waypoint_heading.toFixed();
@@ -98,7 +100,8 @@ var waypoint_heading=null;
 
   updateHeading(new_heading) {
       heading = new_heading.trueHeading.toFixed();
-      this.setState( {userHeading: heading } );
+      var headingText = "User Heading: " + heading + '\n';
+      this.setState( {userHeading: headingText } );
   }
 
   toRadians(degrees) {
@@ -308,9 +311,9 @@ const styles = StyleSheet.create({
   },
   distancecontainer: {
     position:'absolute',
-    left:'25%',
+    left:'5%',
     top:'3%',
-    width:'50%',
+    width:'90%',
   },
   distancetext: {
     flex:1,
