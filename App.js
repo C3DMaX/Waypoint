@@ -10,6 +10,8 @@ var loc_global = {coords: { latitude: 37.78825, longitude: -122.4324}};
 var waypoint_global = null;
 var dist_global = null;
 var nav_mode = false;
+var heading = null;
+var waypoint_heading=null;
 
 //************************** CAMERA SCREEN ***********************************
 
@@ -28,6 +30,8 @@ var nav_mode = false;
     distance:'',
     nav_mode_loc: false,
     dist_unit: 'm',
+    waypointHeading:'',
+    userHeading:'',
   }
 
   async componentWillMount() {
@@ -52,9 +56,10 @@ var nav_mode = false;
 
   async setUpNav() {
     const location_sub = await Location.watchPositionAsync(GEOLOCATION_OPTIONS, new_loc => {this.userMoved(new_loc);});
-
+    const heading_sub = await Location.watchHeadingAsync(new_heading => {this.updateHeading(new_heading)})
     if(nav_mode == false) {
       location_sub.remove();
+      heading_sub.remove();
       console.log("navigation stopped");
       this.setState( {distance: null});
     }
@@ -62,6 +67,8 @@ var nav_mode = false;
       console.log('navigation started');
       this.updateDistance();
       var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit;
+      var headingText = "Waypoint Heading: " + waypoint_heading;
+      this.setState( {waypointHeading: headingText});
       this.setState( {distance: dist_local});
     }
   }
@@ -72,6 +79,8 @@ var nav_mode = false;
     this.updateDistance();
     var dist_local = "Distance to Waypoint: " + dist_global + this.state.dist_unit;
     this.setState( {distance: dist_local});
+    waypoint_heading = this.bearing(loc_global.coords.latitude,loc_global.coords.longitude,waypoint_global.latitude,waypoint_global.longitude);
+    waypoint_heading = waypoint_heading.toFixed();
     console.log('User moved');
   }
 
@@ -79,7 +88,7 @@ var nav_mode = false;
     dist_global = getDistance(loc_global.coords,waypoint_global);
 
     if(dist_global>=1000) {
-      dist_global=(dist_global/1000).toFixed(1);
+      dist_global=(dist_global/1000).toFixed();
       this.setState( { dist_unit:'km' } );
     }
     else {
@@ -87,11 +96,37 @@ var nav_mode = false;
     };
   }
 
+  updateHeading(new_heading) {
+      heading = new_heading.trueHeading.toFixed();
+      this.setState( {userHeading: heading } );
+  }
+
+  toRadians(degrees) {
+    return degrees * Math.PI / 180;
+  };
+
+  toDegrees(radians) {
+    return radians * 180 / Math.PI;
+  }
+
+  bearing(startLat, startLng, destLat, destLng){
+    startLat = this.toRadians(startLat);
+    startLng = this.toRadians(startLng);
+    destLat = this.toRadians(destLat);
+    destLng = this.toRadians(destLng);
+
+    y = Math.sin(destLng - startLng) * Math.cos(destLat);
+    x = Math.cos(startLat) * Math.sin(destLat) - Math.sin(startLat) * Math.cos(destLat) * Math.cos(destLng - startLng);
+    brng = Math.atan2(y, x);
+    brng = this.toDegrees(brng);
+    return (brng + 360) % 360;
+  }
+
   renderCamera = () =>
     (
       <Camera style={styles.camera} type={this.state.type} ratio={this.state.ratio} autoFocus={this.state.autoFocus}>
         <View style={styles.buttoncontainer}><Button onPress={() => this.props.navigation.navigate('menu')} title="Menu"></Button></View>
-        <View style={styles.distancecontainer}><Text style={styles.distancetext}>{this.state.distance}</Text></View>
+        <View style={styles.distancecontainer}><Text style={styles.distancetext}>{this.state.userHeading}{this.state.distance}{this.state.waypointHeading}</Text></View>
       </Camera>
     )
 
@@ -143,9 +178,33 @@ class WaypointMenu extends React.Component {
       : this.setState({nav_button_text : 'Start Navigation'});
   }
 
+  toRadians(degrees) {
+    return degrees * Math.PI / 180;
+  };
+
+  toDegrees(radians) {
+    return radians * 180 / Math.PI;
+  }
+
+  bearing(startLat, startLng, destLat, destLng){
+    startLat = this.toRadians(startLat);
+    startLng = this.toRadians(startLng);
+    destLat = this.toRadians(destLat);
+    destLng = this.toRadians(destLng);
+
+    y = Math.sin(destLng - startLng) * Math.cos(destLat);
+    x = Math.cos(startLat) * Math.sin(destLat) - Math.sin(startLat) * Math.cos(destLat) * Math.cos(destLng - startLng);
+    brng = Math.atan2(y, x);
+    brng = this.toDegrees(brng);
+    return (brng + 360) % 360;
+  }
+
   setMarker(e) {
     waypoint_global = e.nativeEvent.coordinate;
     this.createMarker();
+    waypoint_heading = this.bearing(loc_global.coords.latitude,loc_global.coords.longitude,waypoint_global.latitude,waypoint_global.longitude);
+    waypoint_heading = waypoint_heading.toFixed();
+    //console.log(waypoint_heading);
   }
 
   createMarker() {
@@ -254,6 +313,8 @@ const styles = StyleSheet.create({
     width:'50%',
   },
   distancetext: {
+    flex:1,
+    flexDirection: 'row',
     color: 'white',
     fontSize:20,
     textAlign:'center',
