@@ -8,6 +8,7 @@ AR Application that overlays a waypoint/marker in 3D space over your devices cam
 ## Running Waypoint:
 Waypoint is built using [expo.io](https://expo.io). To run it, either clone this repository into a directory on a machine with the required software to use Expo and run 
 ```sh
+npm install
 expo start
 ```
 along with a mobile device and the [Expo companion app](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en) to run a live preview. 
